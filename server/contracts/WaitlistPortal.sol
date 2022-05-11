@@ -19,7 +19,7 @@ contract WaitlistPortal {
     );
 
     constructor() payable {
-        console.log("Cypherpunk 2022 Waitlist!");
+        console.log("Compiling Waitlist smart contract!");
         // user who is calling this function address
         owner = payable(msg.sender);
     }
@@ -46,39 +46,34 @@ contract WaitlistPortal {
     }
 
     function getWaitlist(string memory _waitlistName) public view returns (Waitlist memory) {
+      
       for (uint i; i < waitlists.length; i++) {
-        if (waitlists[i].name == _waitlistName) {
-          return waitlist;
+        if (keccak256(bytes(waitlists[i].name)) == keccak256(bytes(_waitlistName))){
+          return waitlists[i];
         }
       }
-
       console.log("No waitlist was found for supplied waitlist name.");
     }
-
   
-    function bookWaitlist(
-        string memory _waitlistName,
-        string memory _walletaddress,
-        uint256 _payAmount
+    function bookWaitlist(string memory _waitlistName, string memory _walletaddress, uint _payAmount
     ) public payable {
         uint256 cost = 0.001 ether;
-        waitlist Waitlist;
-
+      
         require(_payAmount <= cost, "Insufficient Ether provided");
 
-        for (uint i; i < waitlist.length; i++) {
-          if (waitlists[i].name == _waitlistName) {
+        for (uint i; i < waitlists.length; i++) {
+          if(keccak256(bytes(waitlists[i].name)) == keccak256(bytes(_waitlistName))){
             waitlist = waitlists[i];
           }
         }
-
-        if (!waitlist) {
+    
+        if(!waitlist) {
           // If no waitlist was found, create one using the supplied name.
           waitlist = Waitlist(_waitlistName, []);
           waitlists.push(waitlist);
         }
 
-        // require(waitlist, "No waitlist was found for supplied waitlist name.");
+        // require(Waitlist, "No waitlist was found for supplied waitlist name.");
 
         (bool success, ) = owner.call{value: _payAmount}("");
         require(success, "Failed to send money");
@@ -86,7 +81,7 @@ contract WaitlistPortal {
         /*
          * This is where we actually store the wait list data in the array.
          */
-        waitlist.entries.push(WaitlistEntry(msg.sender, _walletaddress, block.timestamp));
+        waitlists.entries.push(WaitlistEntry(msg.sender, _walletaddress, block.timestamp));
         console.log("%s has just saved their spot on the wait list!", msg.sender);
 
         emit NewEntry(msg.sender, block.timestamp, waitlist.name, _walletaddress);
